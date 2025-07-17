@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>tasjil</title>
+  <link rel="icon" type="image/png" sizes="30x30" href="favicon.ico">
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f2f2f2; }
+    .a { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+    .form { background: white; padding: 30px; border-radius: 20px; width: 450px; display: flex; flex-direction: column; gap: 10px; }
+    .inputForm { border: 1.5px solid #ecedec; border-radius: 10px; height: 50px; display: flex; align-items: center; padding-left: 10px; transition: 0.2s ease-in-out; }
+    .inputForm:focus-within { border: 1.5px solid #2d79f3; }
+    .input { border: none; outline: none; width: 100%; height: 100%; padding-left: 10px; }
+    .button-submit { background-color: #151717; color: white; font-weight: 500; font-size: 15px; border: none; height: 50px; border-radius: 10px; cursor: pointer; }
+    .p { text-align: center; }
+    .span { color: #2d79f3; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="a">
+    <form class="form" onsubmit="signup(event)">
+      <label>Username</label>
+      <div class="inputForm">
+        <input type="text" id="username" class="input" placeholder="Enter your username" required />
+      </div>
+
+      <label>Email</label>
+      <div class="inputForm">
+        <input type="email" id="email" class="input" placeholder="Enter your email" required />
+      </div>
+
+      <label>Password</label>
+      <div class="inputForm">
+        <input type="password" id="password" class="input" placeholder="Enter your password" required />
+      </div>
+
+      <button class="button-submit" type="submit">Sign Up</button>
+      <p class="p">Already have an account? <span class="span" onclick="window.location.href='loding.html'">Sign In</span></p>
+    </form>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyApAZElYiqtm0IzIMzVm0GdEZW_hsNEmBg",
+      authDomain: "amen-eb252.firebaseapp.com",
+      projectId: "amen-eb252",
+      storageBucket: "amen-eb252.appspot.com",
+      messagingSenderId: "580911886534",
+      appId: "1:580911886534:web:eb73b01dd0b333241ee7c7",
+      measurementId: "G-B757CJF8S4"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Signup function
+    window.signup = async function(event) {
+      event.preventDefault();
+
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Set display name in auth profile
+        await updateProfile(user, {
+          displayName: username
+        });
+
+        // Save user data to Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          username: username,
+          email: email,
+          createdAt: new Date()
+        });
+
+        alert("تم إنشاء الحساب بنجاح!");
+        window.location.href = "loding.html";
+
+      } catch (error) {
+        if (error.code === "auth/email-already-in-use") {
+          alert("البريد الإلكتروني مستخدم بالفعل.");
+        } else if (error.code === "auth/weak-password") {
+          alert("كلمة المرور ضعيفة. يجب أن تكون 6 أحرف على الأقل.");
+        } else {
+          alert("حدث خطأ: " + error.message);
+        }
+      }
+    };
+  </script>
+</body>
+</html>
