@@ -307,7 +307,7 @@ body {
   onAuthStateChanged(auth, (user) => {
     if (!user) {
       // ما فماش مستخدم → رجّعنا للصفحة login
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     }
   });
   document.getElementById("logoutBtn").addEventListener("click", () => {
